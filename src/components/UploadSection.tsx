@@ -120,7 +120,7 @@ export const UploadSection = ({ onFileUpload, onManualSubmit, isAnalyzing }: Upl
                       Drop your CSV file here or click to browse
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      Supports light curve data in CSV format
+                      CSV must have 17 numeric columns (in order): koi_score, koi_fpflag_nt, koi_fpflag_ss, koi_fpflag_co, koi_fpflag_ec, koi_period, koi_time0bk, koi_impact, koi_duration, koi_depth, koi_prad, koi_teq, koi_insol, koi_model_snr, koi_steff, koi_slogg, koi_srad
                     </p>
                   </div>
                 </div>
