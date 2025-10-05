@@ -75,20 +75,9 @@ export const UploadSection = ({ onFileUpload, onManualSubmit, isAnalyzing }: Upl
           </p>
         </div>
 
-        <Tabs defaultValue="upload" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-8 bg-muted/50">
-            <TabsTrigger value="upload" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              <Upload className="w-4 h-4 mr-2" />
-              File Upload
-            </TabsTrigger>
-            <TabsTrigger value="manual" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              <Keyboard className="w-4 h-4 mr-2" />
-              Manual Input
-            </TabsTrigger>
-          </TabsList>
+        <div className="w-full">
 
-          <TabsContent value="upload">
-            <Card className="bg-card/50 backdrop-blur-sm border-border shadow-card p-8">
+          <Card className="bg-card/50 backdrop-blur-sm border-border shadow-card p-8">
           <div
             className={`relative border-2 border-dashed rounded-xl p-12 text-center transition-all duration-300 ${
               dragActive 
@@ -120,7 +109,7 @@ export const UploadSection = ({ onFileUpload, onManualSubmit, isAnalyzing }: Upl
                       Drop your CSV file here or click to browse
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      CSV must have 17 numeric columns (in order): koi_score, koi_fpflag_nt, koi_fpflag_ss, koi_fpflag_co, koi_fpflag_ec, koi_period, koi_time0bk, koi_impact, koi_duration, koi_depth, koi_prad, koi_teq, koi_insol, koi_model_snr, koi_steff, koi_slogg, koi_srad
+                      Upload any CSV file with numeric exoplanet data
                     </p>
                   </div>
                 </div>
@@ -168,15 +157,7 @@ export const UploadSection = ({ onFileUpload, onManualSubmit, isAnalyzing }: Upl
             </div>
           )}
         </Card>
-          </TabsContent>
-
-          <TabsContent value="manual">
-            <ManualInputForm 
-              onSubmit={onManualSubmit}
-              isAnalyzing={isAnalyzing}
-            />
-          </TabsContent>
-        </Tabs>
+        </div>
       </div>
     </section>
   );
