@@ -4,6 +4,28 @@ import { UploadSection } from "@/components/UploadSection";
 import { ResultsDisplay } from "@/components/ResultsDisplay";
 import { Telescope } from "lucide-react";
 
+const requiredColumns = [
+  'koi_score', 'koi_fpflag_nt', 'koi_fpflag_ss', 'koi_fpflag_co', 'koi_fpflag_ec',
+  'koi_period', 'koi_time0bk', 'koi_impact', 'koi_duration', 'koi_depth',
+  'koi_prad', 'koi_teq', 'koi_insol', 'koi_model_snr', 'koi_steff', 'koi_slogg', 'koi_srad'
+];
+
+// Validate CSV file has required columns
+const validateCSV = async (file: File): Promise<void> => {
+  const text = await file.text();
+  const lines = text.split('\n');
+  if (lines.length === 0) {
+    throw new Error("CSV file is empty");
+  }
+  
+  const headers = lines[0].toLowerCase().split(',').map(h => h.trim());
+  const missingColumns = requiredColumns.filter(col => !headers.includes(col.toLowerCase()));
+  
+  if (missingColumns.length > 0) {
+    throw new Error(`Missing required columns: ${missingColumns.join(', ')}`);
+  }
+};
+
 // Mock prediction function - replace with actual API call
 const analyzeLightCurve = async (file: File): Promise<any> => {
   // Simulate API delay
@@ -15,8 +37,9 @@ const analyzeLightCurve = async (file: File): Promise<any> => {
     brightness: 1 + Math.sin(i * 0.3) * 0.02 + (Math.random() - 0.5) * 0.005
   }));
 
-  // Add transit dips
-  [20, 45, 70].forEach(transit => {
+  // Add transit dips with some randomness
+  const transitPositions = [20, 45, 70].map(pos => pos + Math.floor(Math.random() * 5 - 2));
+  transitPositions.forEach(transit => {
     for (let i = transit - 3; i < transit + 3; i++) {
       if (mockData[i]) {
         mockData[i].brightness -= 0.012 * (1 - Math.abs(i - transit) / 3);
@@ -24,7 +47,8 @@ const analyzeLightCurve = async (file: File): Promise<any> => {
     }
   });
 
-  const probability = 0.87;
+  // Randomize probability between 0.15 and 0.98
+  const probability = Math.random() * 0.83 + 0.15;
   return {
     probability,
     isExoplanet: probability > 0.5,
@@ -50,6 +74,9 @@ const Index = () => {
     setResult(null);
     
     try {
+      // Validate CSV has required columns
+      await validateCSV(file);
+      
       const predictionResult = await analyzeLightCurve(file);
       setResult(predictionResult);
       
@@ -58,6 +85,10 @@ const Index = () => {
       }, 100);
     } catch (error) {
       console.error("Analysis error:", error);
+      const errorMessage = error instanceof Error ? error.message : "Analysis failed";
+      // Show error to user via toast (imported from sonner)
+      const { toast } = await import("sonner");
+      toast.error(errorMessage);
     } finally {
       setIsAnalyzing(false);
     }
