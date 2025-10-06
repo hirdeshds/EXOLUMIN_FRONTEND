@@ -75,89 +75,105 @@ export const UploadSection = ({ onFileUpload, onManualSubmit, isAnalyzing }: Upl
           </p>
         </div>
 
-        <div className="w-full">
+        <Tabs defaultValue="upload" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-8">
+            <TabsTrigger value="upload" className="flex items-center gap-2">
+              <Upload className="w-4 h-4" />
+              Upload CSV
+            </TabsTrigger>
+            <TabsTrigger value="manual" className="flex items-center gap-2">
+              <Keyboard className="w-4 h-4" />
+              Manual Input
+            </TabsTrigger>
+          </TabsList>
 
-          <Card className="bg-card/50 backdrop-blur-sm border-border shadow-card p-8">
-          <div
-            className={`relative border-2 border-dashed rounded-xl p-12 text-center transition-all duration-300 ${
-              dragActive 
-                ? "border-primary bg-primary/10" 
-                : "border-border hover:border-primary/50"
-            }`}
-            onDragEnter={handleDrag}
-            onDragLeave={handleDrag}
-            onDragOver={handleDrag}
-            onDrop={handleDrop}
-          >
-            <input
-              type="file"
-              id="file-upload"
-              className="hidden"
-              onChange={handleChange}
-              accept=".csv,text/csv,application/vnd.ms-excel"
-              disabled={isAnalyzing}
-            />
-
-            {!selectedFile ? (
-              <label htmlFor="file-upload" className="cursor-pointer">
-                <div className="flex flex-col items-center gap-4">
-                  <div className="p-4 bg-primary/10 rounded-full">
-                    <Upload className="w-12 h-12 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-lg font-medium mb-2">
-                      Drop your CSV file here or click to browse
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      Upload any CSV file with numeric exoplanet data
-                    </p>
-                  </div>
-                </div>
-              </label>
-            ) : (
-              <div className="flex items-center justify-between bg-muted rounded-lg p-4">
-                <div className="flex items-center gap-3">
-                  <FileText className="w-8 h-8 text-primary" />
-                  <div className="text-left">
-                    <p className="font-medium">{selectedFile.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {(selectedFile.size / 1024).toFixed(2)} KB
-                    </p>
-                  </div>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={removeFile}
-                  disabled={isAnalyzing}
-                >
-                  <X className="w-5 h-5" />
-                </Button>
-              </div>
-            )}
-          </div>
-
-          {selectedFile && (
-            <div className="mt-8 flex justify-center">
-              <Button
-                size="lg"
-                onClick={handleAnalyze}
-                disabled={isAnalyzing}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 shadow-glow"
+          <TabsContent value="upload">
+            <Card className="bg-card/50 backdrop-blur-sm border-border shadow-card p-8">
+              <div
+                className={`relative border-2 border-dashed rounded-xl p-12 text-center transition-all duration-300 ${
+                  dragActive 
+                    ? "border-primary bg-primary/10" 
+                    : "border-border hover:border-primary/50"
+                }`}
+                onDragEnter={handleDrag}
+                onDragLeave={handleDrag}
+                onDragOver={handleDrag}
+                onDrop={handleDrop}
               >
-                {isAnalyzing ? (
-                  <>
-                    <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
-                    Analyzing...
-                  </>
+                <input
+                  type="file"
+                  id="file-upload"
+                  className="hidden"
+                  onChange={handleChange}
+                  accept=".csv,text/csv,application/vnd.ms-excel"
+                  disabled={isAnalyzing}
+                />
+
+                {!selectedFile ? (
+                  <label htmlFor="file-upload" className="cursor-pointer">
+                    <div className="flex flex-col items-center gap-4">
+                      <div className="p-4 bg-primary/10 rounded-full">
+                        <Upload className="w-12 h-12 text-primary" />
+                      </div>
+                      <div>
+                        <p className="text-lg font-medium mb-2">
+                          Drop your CSV file here or click to browse
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          Upload any CSV file with 17 numeric columns
+                        </p>
+                      </div>
+                    </div>
+                  </label>
                 ) : (
-                  "Analyze with AI"
+                  <div className="flex items-center justify-between bg-muted rounded-lg p-4">
+                    <div className="flex items-center gap-3">
+                      <FileText className="w-8 h-8 text-primary" />
+                      <div className="text-left">
+                        <p className="font-medium">{selectedFile.name}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {(selectedFile.size / 1024).toFixed(2)} KB
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={removeFile}
+                      disabled={isAnalyzing}
+                    >
+                      <X className="w-5 h-5" />
+                    </Button>
+                  </div>
                 )}
-              </Button>
-            </div>
-          )}
-        </Card>
-        </div>
+              </div>
+
+              {selectedFile && (
+                <div className="mt-8 flex justify-center">
+                  <Button
+                    size="lg"
+                    onClick={handleAnalyze}
+                    disabled={isAnalyzing}
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 shadow-glow"
+                  >
+                    {isAnalyzing ? (
+                      <>
+                        <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
+                        Analyzing...
+                      </>
+                    ) : (
+                      "Analyze with AI"
+                    )}
+                  </Button>
+                </div>
+              )}
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="manual">
+            <ManualInputForm onSubmit={onManualSubmit} isAnalyzing={isAnalyzing} />
+          </TabsContent>
+        </Tabs>
       </div>
     </section>
   );
