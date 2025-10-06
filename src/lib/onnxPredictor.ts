@@ -1,5 +1,17 @@
 import * as ort from 'onnxruntime-web';
 
+// Configure ORT Web to load WASM from CDN and avoid multi-threading (needs COOP/COEP)
+if (typeof window !== 'undefined') {
+  try {
+    // Use the exact installed version to prevent 404s
+    ort.env.wasm.wasmPaths = 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.23.0/dist/';
+    ort.env.wasm.numThreads = 1; // single-threaded for broader compatibility
+    ort.env.wasm.simd = true;    // enable SIMD when available
+  } catch (e) {
+    console.warn('ORT env config failed:', e);
+  }
+}
+
 let session: ort.InferenceSession | null = null;
 
 export const initializeModel = async (): Promise<void> => {
