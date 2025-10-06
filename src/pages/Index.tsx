@@ -63,11 +63,6 @@ const Index = () => {
     setIsAnalyzing(true);
     setResult(null);
     
-    // Show info toast for first-time cold start
-    toast.info("Analyzing data... First request may take 30-60 seconds as the server wakes up.", {
-      duration: 5000,
-    });
-    
     try {
       const predictionResult = await analyzeLightCurve(file);
       setResult(predictionResult);
@@ -80,8 +75,11 @@ const Index = () => {
       const errorMessage = error instanceof Error ? error.message : "Analysis failed. Please check your CSV format.";
       toast.error(errorMessage, {
         action: {
-          label: "Retry",
-          onClick: () => handleFileUpload(file)
+          label: "Reset",
+          onClick: () => {
+            setResult(null);
+            setShowUpload(true);
+          }
         }
       });
     } finally {
@@ -92,10 +90,6 @@ const Index = () => {
   const handleManualSubmit = async (data: any) => {
     setIsAnalyzing(true);
     setResult(null);
-    
-    toast.info("Analyzing data... First request may take 30-60 seconds as the server wakes up.", {
-      duration: 5000,
-    });
     
     try {
       // Convert manual input object to array in the correct order

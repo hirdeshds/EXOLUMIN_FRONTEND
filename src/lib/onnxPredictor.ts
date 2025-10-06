@@ -1,36 +1,42 @@
-const ML_API_URL = 'https://exolumin-ml-backend.onrender.com/predict';
+import * as ort from 'onnxruntime-web';
+
+let session: ort.InferenceSession | null = null;
+
+export const initializeModel = async (): Promise<void> => {
+  if (session) return;
+  try {
+    session = await ort.InferenceSession.create('/models/random_forest_exo.onnx');
+    console.log('ONNX model loaded successfully');
+  } catch (error) {
+    console.error('Failed to load ONNX model:', error);
+    throw new Error('Failed to initialize ML model');
+  }
+};
 
 export const predictExoplanet = async (features: number[]): Promise<number> => {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
-
   try {
-    const response = await fetch(ML_API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ features }),
-      signal: controller.signal,
-    });
+    if (!session) await initializeModel();
+    if (!session) throw new Error('Model not initialized');
 
-    clearTimeout(timeoutId);
+    const inputName = session.inputNames?.[0];
+    const outputName = session.outputNames?.[0];
 
-    if (!response.ok) {
-      throw new Error(`API error: ${response.status}`);
-    }
+    const inputArray = new Float32Array(features.map((v) => Number(v)));
+    const inputTensor = new ort.Tensor('float32', inputArray, [1, features.length]);
 
-    const data = await response.json();
-    return data.probability || data.prediction || 0.5;
+    const feeds: Record<string, ort.Tensor> = { [inputName]: inputTensor } as any;
+    const results = await session.run(feeds);
+
+    const output = results[outputName];
+    const data = Array.from((output.data as any) as number[]);
+
+    let prob = data.length === 1 ? data[0] : (data[1] ?? Math.max(...data));
+    if (isNaN(prob)) prob = 0.5;
+    prob = Math.max(0, Math.min(1, prob));
+    return prob;
   } catch (error) {
-    clearTimeout(timeoutId);
-    
-    if (error instanceof Error && error.name === 'AbortError') {
-      throw new Error('Request timed out. The server may be waking up, please try again.');
-    }
-    
     console.error('Prediction error:', error);
-    throw new Error('Failed to connect to ML model. Please try again.');
+    throw new Error('Prediction failed');
   }
 };
 
