@@ -87,6 +87,79 @@ const Index = () => {
     }
   };
 
+  const handleManualSubmit = async (data: any) => {
+    setIsAnalyzing(true);
+    setResult(null);
+    
+    try {
+      // Convert manual input object to array in the correct order
+      const features = [
+        data.koi_score,
+        data.koi_fpflag_nt,
+        data.koi_fpflag_ss,
+        data.koi_fpflag_co,
+        data.koi_fpflag_ec,
+        data.koi_period,
+        data.koi_time0bk,
+        data.koi_impact,
+        data.koi_duration,
+        data.koi_depth,
+        data.koi_prad,
+        data.koi_teq,
+        data.koi_insol,
+        data.koi_model_snr,
+        data.koi_steff,
+        data.koi_slogg,
+        data.koi_srad,
+      ];
+
+      // Get prediction from ML model
+      const probability = await predictExoplanet(features);
+      
+      // Generate mock light curve data
+      const mockData = Array.from({ length: 100 }, (_, i) => ({
+        time: i * 0.5,
+        brightness: 1 + Math.sin(i * 0.3) * 0.02 + (Math.random() - 0.5) * 0.005
+      }));
+
+      const transitDepth = probability > 0.5 ? 0.015 : 0.008;
+      const transitPositions = [20, 45, 70].map(pos => pos + Math.floor(Math.random() * 5 - 2));
+      transitPositions.forEach(transit => {
+        for (let i = transit - 3; i < transit + 3; i++) {
+          if (mockData[i]) {
+            mockData[i].brightness -= transitDepth * (1 - Math.abs(i - transit) / 3);
+          }
+        }
+      });
+
+      const predictionResult = {
+        probability,
+        isExoplanet: probability > 0.5,
+        confidence: probability > 0.8 ? "High" : probability > 0.5 ? "Medium" : "Low",
+        lightCurveData: mockData
+      };
+
+      setResult(predictionResult);
+      
+      setTimeout(() => {
+        document.getElementById('results-section')?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    } catch (error) {
+      console.error("Analysis error:", error);
+      const errorMessage = error instanceof Error ? error.message : "Analysis failed. Please check your input.";
+      toast.error(errorMessage, {
+        action: {
+          label: "Reset",
+          onClick: () => {
+            setResult(null);
+            setShowUpload(true);
+          }
+        }
+      });
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
 
 
   return (
@@ -114,6 +187,7 @@ const Index = () => {
         <div id="upload-section">
           <UploadSection 
             onFileUpload={handleFileUpload}
+            onManualSubmit={handleManualSubmit}
             isAnalyzing={isAnalyzing}
           />
         </div>

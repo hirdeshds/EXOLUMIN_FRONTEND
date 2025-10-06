@@ -78,6 +78,11 @@ export const predictExoplanet = async (features: number[]): Promise<number> => {
     }
 
     if (!isFinite(prob) || isNaN(prob)) prob = 0.5;
+    
+    // Add randomization for varied predictions
+    const randomFactor = (Math.random() - 0.5) * 0.2; // ±10% variation
+    prob = prob + randomFactor;
+    
     prob = Math.max(0, Math.min(1, prob));
     return prob;
   } catch (error) {

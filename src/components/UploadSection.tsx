@@ -1,17 +1,19 @@
 import { useState, useCallback } from "react";
-import { Upload, FileText, X } from "lucide-react";
+import { Upload, FileText, X, Keyboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import { ManualInputForm } from "./ManualInputForm";
 
 
 interface UploadSectionProps {
   onFileUpload: (file: File) => void;
+  onManualSubmit: (data: any) => void;
   isAnalyzing: boolean;
 }
 
-export const UploadSection = ({ onFileUpload, isAnalyzing }: UploadSectionProps) => {
+export const UploadSection = ({ onFileUpload, onManualSubmit, isAnalyzing }: UploadSectionProps) => {
   const [dragActive, setDragActive] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
@@ -70,15 +72,19 @@ export const UploadSection = ({ onFileUpload, isAnalyzing }: UploadSectionProps)
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold mb-4">Input Exoplanet Data</h2>
           <p className="text-muted-foreground text-lg">
-            Upload a CSV file with numeric columns (header optional)
+            Upload CSV data or enter KOI parameters manually
           </p>
         </div>
 
         <Tabs defaultValue="upload" className="w-full">
-          <TabsList className="grid w-full grid-cols-1 mb-8">
+          <TabsList className="grid w-full grid-cols-2 mb-8">
             <TabsTrigger value="upload" className="flex items-center gap-2">
               <Upload className="w-4 h-4" />
               Upload CSV
+            </TabsTrigger>
+            <TabsTrigger value="manual" className="flex items-center gap-2">
+              <Keyboard className="w-4 h-4" />
+              Manual Input
             </TabsTrigger>
           </TabsList>
 
@@ -115,7 +121,7 @@ export const UploadSection = ({ onFileUpload, isAnalyzing }: UploadSectionProps)
                           Drop your CSV file here or click to browse
                         </p>
                         <p className="text-sm text-muted-foreground">
-                          Upload a CSV with numeric columns (header optional)
+                          Upload CSV with 17 KOI parameters
                         </p>
                       </div>
                     </div>
@@ -165,6 +171,9 @@ export const UploadSection = ({ onFileUpload, isAnalyzing }: UploadSectionProps)
             </Card>
           </TabsContent>
 
+          <TabsContent value="manual">
+            <ManualInputForm onSubmit={onManualSubmit} isAnalyzing={isAnalyzing} />
+          </TabsContent>
         </Tabs>
       </div>
     </section>
