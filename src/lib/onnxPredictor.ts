@@ -1,6 +1,9 @@
 const ML_API_URL = 'https://exolumin-ml-backend.onrender.com/predict';
 
 export const predictExoplanet = async (features: number[]): Promise<number> => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
+
   try {
     const response = await fetch(ML_API_URL, {
       method: 'POST',
@@ -8,7 +11,10 @@ export const predictExoplanet = async (features: number[]): Promise<number> => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ features }),
+      signal: controller.signal,
     });
+
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       throw new Error(`API error: ${response.status}`);
@@ -17,6 +23,12 @@ export const predictExoplanet = async (features: number[]): Promise<number> => {
     const data = await response.json();
     return data.probability || data.prediction || 0.5;
   } catch (error) {
+    clearTimeout(timeoutId);
+    
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw new Error('Request timed out. The server may be waking up, please try again.');
+    }
+    
     console.error('Prediction error:', error);
     throw new Error('Failed to connect to ML model. Please try again.');
   }
