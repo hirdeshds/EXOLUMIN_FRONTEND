@@ -17,7 +17,9 @@ let session: ort.InferenceSession | null = null;
 export const initializeModel = async (): Promise<void> => {
   if (session) return;
   try {
-    session = await ort.InferenceSession.create('/models/random_forest_exo.onnx');
+    session = await ort.InferenceSession.create('/models/random_forest_exo.onnx', {
+      executionProviders: ['wasm'],
+    });
     console.log('ONNX model loaded successfully');
   } catch (error) {
     console.error('Failed to load ONNX model:', error);
